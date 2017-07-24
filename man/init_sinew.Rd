@@ -2,9 +2,16 @@
 % Please edit documentation in R/init_sinew.R
 \name{init_sinew}
 \alias{init_sinew}
-\title{Initialize SINEW opts for roxygenize}
+\title{init_sinew}
 \usage{
-init_sinew()
+init_sinew(add_fields = c("details", "examples", "rdname", "export",
+  "author"), author = as.character(person("Lorenzo", "Busetto, phD (2017)",
+  email = "lbusett@gmail.com")))
+}
+\arguments{
+\item{add_fields}{PARAM_DESCRIPTION, Default: c("details", "examples", "rdname", "export", "author")}
+
+\item{author}{PARAM_DESCRIPTION, Default: as.character(person("Lorenzo", "Busetto, phD (2017)", email = "lbusett@gmail.com"))}
 }
 \value{
 OUTPUT_DESCRIPTION
