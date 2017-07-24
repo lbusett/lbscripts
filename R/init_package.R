@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 init_package <- function() {
   require(devtools)
   # devtools::create()
@@ -13,4 +14,20 @@ init_package <- function() {
   devtools::use_vignette()
   devtools::use_travis()
   devtools::use_news_md()
+=======
+init_package <- function(pkgname) {
+  require(devtools)
+  devtools::create(pkgname)
+  devtools::use_news_md(pkgname)
+  devtools::use_data(pkgname)
+  devtools::use_readme_rmd(pkgname)
+  devtools::use_build_ignore(pkgname)
+  devtools::use_coverage(pkgname)
+  devtools::use_cran_comments(pkgname)
+  devtools::use_gpl3_license(pkgname)
+  devtools::use_rstudio(pkgname)
+  devtools::uses_testthat(pkgname)
+  devtools::use_vignette(pkgname)
+  devtools::use_travis(pkgname)
+>>>>>>> master
 }
