@@ -1,0 +1,36 @@
+---
+title: "Tips and Tricks"
+output: github_document
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Introduction
+
+This page documents some tips and tricks - reminders of syntax for R programming
+
+## String manipulation
+
+#### Print an integer number with trailing zeroes
+```{r}
+number <- 1
+sprintf("%03i", number)
+```
+#### use "easier" patterns with wildcards for regexp
+```{r, eval=FALSE}
+glob2rx('*.tif')
+```
+
+## Package checking
+
+```{r, eval=FALSE}
+### lintr: change limit on lines
+with_defaults(line_length_linter(100)) # you love long lines
+
+```
+
