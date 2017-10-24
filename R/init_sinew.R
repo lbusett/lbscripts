@@ -17,8 +17,10 @@
 #'
 init_sinew <- function(add_fields = c("details", "examples", "rdname", "export", "author"),
                        author = as.character(person("Lorenzo", "Busetto, phD (2017)", email = "lbusett@gmail.com"))) {
+  if (requireNamespace("sinew")) {
   sinew::sinew_opts$set(add_fields = add_fields)
   sinew::sinew_opts$set(author     = author)
   message("current add_fields: ", paste(sinew_opts$get("add_fields"), collapse = " "))
   message("current author: ", sinew_opts$get("author"))
+  }
 }
