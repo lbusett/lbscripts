@@ -30,8 +30,11 @@ lb_linregr <- function(in_data,
 
   # in_names <- c(x_var, y_var, group_var)
   # newnames <- c("X_VAR", "Y_VAR", "GP_VAR")
-
-  in_data  <- dumbify::dumbify(in_data, c(X_VAR, Y_VAR, GP_VAR))
+  if (is.null(GP_VAR)) {
+    in_data  <- dumbify::dumbify(in_data, c(X_VAR, Y_VAR))
+  } else {
+    in_data  <- dumbify::dumbify(in_data, c(X_VAR, Y_VAR, GP_VAR))
+  }
   #   ____________________________________________________________________________
   #   rename the names of the columns to be used in the regr- analysis to     ####
   #   X and Y
@@ -40,21 +43,32 @@ lb_linregr <- function(in_data,
     in_data[["Y_VAR"]] <- as.numeric(in_data[["Y_VAR"]])
   }
 
-
   #   ____________________________________________________________________________
   #   Compute regression coefficients and stats                               ####
 
-  coeffs <- in_data %>%
-    dplyr::group_by(GP_VAR) %>%
-    do(broom::tidy(lm(Y_VAR ~ X_VAR, .))) %>%
-    dplyr::select(., c("GP_VAR", "term", "estimate")) %>%
-    tidyr::spread(term, estimate)
+  if (is.null(GP_VAR)) {
+    coeffs <- in_data %>%
+      do(broom::tidy(lm(Y_VAR ~ X_VAR, .))) %>%
+      dplyr::select(., c("term", "estimate")) %>%
+      tidyr::spread(term, estimate)
+    stats <- in_data %>%
+      do(broom::glance(stats::lm(Y_VAR ~ X_VAR, ., na.action = "na.omit")))
+    names(coeffs)[1:2] <- c("intercept", "slope")
+  } else {
+    coeffs <- in_data %>%
+      dplyr::group_by(GP_VAR) %>%
+      do(broom::tidy(lm(Y_VAR ~ X_VAR, .))) %>%
+      dplyr::select(., c("GP_VAR", "term", "estimate")) %>%
+      tidyr::spread(term, estimate)
 
-  names(coeffs)[2:3] <- c("intercept", "slope")
+    stats <- in_data %>%
+      dplyr::group_by(GP_VAR) %>%
+      do(broom::glance(stats::lm(Y_VAR ~ X_VAR, ., na.action = "na.omit")))
+    names(coeffs)[2:3] <- c("intercept", "slope")
+  }
 
-  stats <- in_data %>%
-    dplyr::group_by(GP_VAR) %>%
-    do(broom::glance(stats::lm(Y_VAR ~ X_VAR, ., na.action = "na.omit")))
+
+
 
 
   #   __________________________________________________________________________
@@ -62,17 +76,17 @@ lb_linregr <- function(in_data,
 
   out <- merge(coeffs, stats) %>%
     dplyr::rename("r2" = r.squared,
-           "adj_r2" = adj.r.squared,
-           "p" = p.value) %>%
+                  "adj_r2" = adj.r.squared,
+                  "p" = p.value) %>%
     dplyr::mutate(r = r2 ^ 0.5,
-           N = df.residual + 1,
-           lab = paste("Y =",
-                       format(slope, digits = 1), "* X", ifelse(intercept < 0, "-", "+" ),
-                       format(abs(intercept), digit = 1, scientific = F),
-                       "; r^2 =", format(r2, digits = 1, scientific = F),
-                       "; p =", format(p, digits = 1, scientific = F)),
-           shortlab = paste("slope =", format(slope, digits = 1, scientific = F),
-                            "; r^2 =",   format(r2,    digits = 1, scientific = F))) %>%
+                  N = df.residual + 1,
+                  lab = paste("Y =",
+                              format(slope, digits = 1), "* X", ifelse(intercept < 0, "-", "+" ),
+                              format(abs(intercept), digit = 1, scientific = F),
+                              "; r^2 =", format(r2, digits = 1, scientific = F),
+                              "; p =", format(p, digits = 1, scientific = F)),
+                  shortlab = paste("slope =", format(slope, digits = 1, scientific = F),
+                                   "; r^2 =",   format(r2,    digits = 1, scientific = F))) %>%
     dplyr::select(1, lab, N, intercept, slope, r2, p, adj_r2, r, df,
                   AIC, BIC, logLik, deviance, df.residual, shortlab) %>%
     data.table::as.data.table()
@@ -90,4 +104,5 @@ lb_linregr <- function(in_data,
   # names(out)[which(names(out) == "GP_VAR")] <- group_var
 
   out <- dumbify::undumbify(out, c(X_VAR, Y_VAR, GP_VAR))
+  out
 }

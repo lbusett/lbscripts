@@ -24,9 +24,9 @@
 #'   geom_text scale_x_date scale_y_date scale_x_continuous scale_y_continuous
 #'   ggtitle expand_scale
 lb_plotregr <- function(in_data,
-                        GP_VAR,
                         X_VAR,
                         Y_VAR,
+                        GP_VAR = NULL,
                         common_range = TRUE,
                         title = NULL,
                         subtitle = NULL) {
@@ -34,19 +34,22 @@ lb_plotregr <- function(in_data,
   #   __________________________________________________________________________
   #   Perform regression analysis to get info for the labels                ####
 
-  regr <- lb_linregr(in_data, X_VAR, Y_VAR, GP_VAR =
-                       ifelse(is.null(GP_VAR), NULL, GP_VAR))
+  regr <- lb_linregr(in_data, X_VAR, Y_VAR, GP_VAR)
 
   #   __________________________________________________________________________
   #   Dumbify columns to avoid scoping problems                             ####
 
-
-  in_data  <- dumbify::dumbify(in_data, c(X_VAR, Y_VAR, GP_VAR))
-  regr     <- dumbify::dumbify(regr, c(GP_VAR))
+  if (!is.null(GP_VAR)) {
+    in_data  <- dumbify::dumbify(in_data, c(X_VAR, Y_VAR, GP_VAR))
+    regr     <- dumbify::dumbify(regr, c(GP_VAR))
+  } else {
+    in_data  <- dumbify::dumbify(in_data, c(X_VAR, Y_VAR))
+    regr     <- dumbify::dumbify(regr, c(GP_VAR))
+  }
 
   #   __________________________________________________________________________
   #   Compute the ranges to be used if neeeded                              ####
-  if (common_range & !is.null(GP_VAR)){
+  if (common_range & !is.null(GP_VAR)) {
 
     ranges <- data.table::as.data.table(in_data) %>%
       data.table::setkey(GP_VAR) %>%
@@ -84,7 +87,7 @@ lb_plotregr <- function(in_data,
     geom_smooth(method = "lm", se = T, color = "black")
 
   if (!is.null(GP_VAR)) {
-    plot <- plot + facet_wrap(~ GP_VAR, ncol = 2, scales = "free_y")
+    plot <- plot + facet_wrap(~ GP_VAR, ncol = 2, scales = "free")
     if (common_range){
       plot <- plot + geom_blank(data = dummy)
     }
